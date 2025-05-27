@@ -16,6 +16,7 @@ This repository contains two Java command-line applications for printing PDF doc
   - [Print Server Printing (IPPPrintAppToPrintServer)](#print-server-printing-ippprintapptoprintserver)
 - [Configuration](#configuration)
 - [Print Attributes](#print-attributes)
+- [PaperCut Print Server Setup](#papercut_print_server_setup)
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
 
@@ -34,12 +35,16 @@ This project demonstrates two approaches for IPP-based printing in Java:
 
 - Java 11 or newer
 - [Apache PDFBox](https://pdfbox.apache.org/) library (for direct PDF printing)
-- Access to a printer or an IPP print server
+- Access to a printer, virtual printer, or an IPP print server
 - For "Microsoft Print to PDF": Windows 10/11 with the feature enabled
 
 ---
 
 ## Usage
+
+### Configuratiuon with application.properties
+
+All settings for both applications are managed in the provided application.properties file.
 
 ### Direct Printing (`IPPPrintAppToPrinter.java`)
 
@@ -141,6 +146,54 @@ String filepath = "C:\dev\projects\IPP PoC\IPPPrintApp\src\main\resources\" + fi
   Run your application with sufficient permissions to access printers and files.
 
 ---
+
+## PaperCut Print Server Setup
+
+### Installing PaperCut NG/MF
+
+System Requirements:
+Ensure your server meets PaperCut NG/MF system requirements.
+
+Download and Install:
+Download PaperCut NG/MF from the official PaperCut website.
+Run the installer and follow the configuration wizard.
+Complete the initial setup and test the client software.
+
+Add Printers:
+Set up all printers on the system using the manufacturer’s print drivers.
+Test print on each printer to confirm functionality.
+
+Firewall:
+Ensure ports 9163 (HTTP) and 9164 (HTTPS) are open for PaperCut Mobility Print.
+
+Verify Setup:
+Log in to the PaperCut web admin interface.
+Confirm printers are listed and jobs are tracked.
+
+For detailed steps, see the PaperCut NG/MF Installation Guide on the PaperCut website.
+
+### Configuring a Virtual Print Queue ("Find-Me" Printing)
+
+A virtual or "Find-Me" print queue allows users to print to a single queue and release jobs at any physical printer.
+
+Create a Virtual Print Queue:
+On the print server, create a new print queue (e.g., find-me-queue) using the same driver as your physical printers.
+Point the queue to a nul port (Windows) or leave it unassigned (some drivers require a real IP).
+
+Register with PaperCut:
+Ensure the virtual queue appears in the PaperCut admin interface under the Printers tab.
+
+Configure as Virtual Queue:
+In the PaperCut admin interface, select the virtual queue.
+Set Queue type to "This is a virtual queue (jobs will be forwarded to a different queue)".
+In Job Redirection Settings, select destination print queues.
+Enable Hold/Release Queue if desired.
+
+Secure Print Release (optional):
+Configure devices for secure print release via the Devices tab.
+Link the virtual queue to devices for user job release.
+
+For more, see Find-Me Printing Overview and Virtual Queue Setup in the PaperCut documentation.
 
 ## License
 
