@@ -7,14 +7,33 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 
 public class IPPPrintAppToPrintServer {
   public static void main(String[] args) throws Exception {
-    String ippUrl = "http://localhost:9163/printers/VirtualPrinter";
-    String filename = "test.pdf";
-    String filepath = "C:\\dev\\projects\\IPP PoC\\IPPPrintApp\\src\\main\\resources\\" + filename;
-    byte[] fileBytes= new FileInputStream(filepath).readAllBytes();
-    byte[] ippRequest = buildIppPrintJobRequest(filename, fileBytes, ippUrl);
+    // Load properties
+    Properties prop = new Properties();
+    try (FileInputStream input = new FileInputStream("src/main/resources/application.properties")) {
+      prop.load(input);
+    }
+
+    // Read properties
+    String ippUrl = prop.getProperty("ippUrl", "http://localhost:9163/printers/VirtualPrinter");
+    String filename = prop.getProperty("filename", "test.pdf");
+    String fileLocation = prop.getProperty("fileLocation", "./");
+    String filepath = fileLocation + filename;
+
+    String jobName = prop.getProperty("jobName", filename);
+    String documentFormat = prop.getProperty("documentFormat", "application/pdf");
+    int copies = Integer.parseInt(prop.getProperty("copies", "1"));
+    String media = prop.getProperty("media", "iso_a4_210x297mm");
+    int orientationRequested = Integer.parseInt(prop.getProperty("orientationRequested", "3"));
+    String sides = prop.getProperty("sides", "two-sided-long-edge");
+    String charset = prop.getProperty("charset", "utf-8");
+    String naturalLanguage = prop.getProperty("naturalLanguage", "en");byte[] fileBytes= new FileInputStream(filepath).readAllBytes();
+    byte[] ippRequest = buildIppPrintJobRequest(
+         jobName, fileBytes, ippUrl, documentFormat, copies, media, orientationRequested, sides, charset, naturalLanguage
+    );
 
     HttpClient client = HttpClient.newHttpClient();
     HttpRequest request = HttpRequest.newBuilder()
@@ -26,35 +45,20 @@ public class IPPPrintAppToPrintServer {
     HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
     System.out.println("IPP Server Response code: " + response.statusCode());
-    System.out.println("IPP Server Response body (raw): " + response.body());
   }
 
-  private static byte[] buildIppPrintJobRequest(String jobName, byte[] documentData, String ippUrl) throws Exception {
-        /*
-         Minimal IPP request structure:
-
-         [version]          2 bytes: 0x01 0x01 (IPP 1.1)
-         [operation-id]      2 bytes: 0x00 0x02 (Print-Job)
-         [request-id]        4 bytes: 0x00 0x00 0x00 0x01 (request number)
-
-         // Operation Attributes Tag
-         [tag]               1 byte: 0x01 (operation-attributes-tag)
-
-         // attributes: charset, language, printer-uri, job-name, document-format
-
-         [name-length]       2 bytes (big endian)
-         [name]              variable length
-         [value-length]      2 bytes (big endian)
-         [value]             variable length
-
-         // end of attributes: 1 byte 0x03
-
-         [document-data]     raw document bytes
-        */
-
-    // We'll use a helper method to build the attribute byte arrays.
-
-    // Buffer size estimation:
+  private static byte[] buildIppPrintJobRequest(
+       String jobName,
+       byte[] documentData,
+       String ippUrl,
+       String documentFormat,
+       int copies,
+       String media,
+       int orientationRequested,
+       String sides,
+       String charset,
+       String naturalLanguage
+  ) throws Exception {
     int bufferSize = 1024 + documentData.length;
     ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
 
@@ -67,18 +71,17 @@ public class IPPPrintAppToPrintServer {
     // Operation Attributes Tag
     buffer.put((byte)0x01);
 
-    // attributes
-    putAttr(buffer, (byte)0x47, "attributes-charset", "utf-8");
-    putAttr(buffer, (byte)0x48, "attributes-natural-language", "en");
+    putAttr(buffer, (byte)0x47, "attributes-charset", charset);
+    putAttr(buffer, (byte)0x48, "attributes-natural-language", naturalLanguage);
     putAttr(buffer, (byte)0x45, "printer-uri", ippUrl); // uri type
     putAttr(buffer, (byte)0x42, "job-name", jobName);
-    putAttr(buffer, (byte)0x49, "document-format", "text/plain");
-    putAttr(buffer, (byte) 0x21, "copies", 2); // integer
-    putAttr(buffer, (byte) 0x44, "media", "iso_a4_210x297mm"); // keyword
-    putAttr(buffer, (byte) 0x23, "orientation-requested", 3); // enum
-    putAttr(buffer, (byte) 0x44, "sides", "two-sided-long-edge"); // keyword
+    putAttr(buffer, (byte)0x49, "document-format", documentFormat);
+    putAttr(buffer, (byte)0x21, "copies", copies); // integer
+    putAttr(buffer, (byte)0x44, "media", media); // keyword
+    putAttr(buffer, (byte)0x23, "orientation-requested", orientationRequested); // enum
+    putAttr(buffer, (byte)0x44, "sides", sides); // keyword
 
-    // end of attributes tag
+    // End of attributes tag
     buffer.put((byte)0x03);
 
     // Document data
