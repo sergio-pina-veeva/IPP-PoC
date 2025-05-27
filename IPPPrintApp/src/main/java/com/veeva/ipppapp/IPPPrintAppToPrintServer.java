@@ -1,6 +1,9 @@
 package com.veeva.ipppapp;
 
+import javax.print.attribute.Attribute;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -10,10 +13,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 public class IPPPrintAppToPrintServer {
-  public static void main(String[] args) throws Exception {
+  public static void print() throws Exception {
     // Load properties
     Properties prop = new Properties();
-    try (FileInputStream input = new FileInputStream("src/main/resources/application.properties")) {
+    try (FileInputStream input = new FileInputStream("application.properties")) {
+      if (input == null) {
+        throw new FileNotFoundException("application.properties not found in classpath");
+      }
       prop.load(input);
     }
 
@@ -35,6 +41,11 @@ public class IPPPrintAppToPrintServer {
          jobName, fileBytes, ippUrl, documentFormat, copies, media, orientationRequested, sides, charset, naturalLanguage
     );
 
+    System.out.println("Print Attributes:");
+    for (String key : prop.stringPropertyNames()) {
+      System.out.println(key + " = " + prop.getProperty(key));
+    }
+
     HttpClient client = HttpClient.newHttpClient();
     HttpRequest request = HttpRequest.newBuilder()
          .uri(URI.create(ippUrl))
@@ -44,8 +55,9 @@ public class IPPPrintAppToPrintServer {
 
     HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
+    System.out.println("Print job sent to: " + ippUrl);
     System.out.println("IPP Server Response code: " + response.statusCode());
-  }
+    System.out.println("IPP Server Response body: " + response.body());}
 
   private static byte[] buildIppPrintJobRequest(
        String jobName,

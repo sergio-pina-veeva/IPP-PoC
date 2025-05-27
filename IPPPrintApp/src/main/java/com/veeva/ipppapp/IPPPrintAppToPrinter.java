@@ -18,14 +18,28 @@ import javax.print.attribute.standard.Sides;
 import java.awt.print.PrinterJob;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class IPPPrintAppToPrinter {
-  public static void main(String[] args) throws Exception {
+  public static void print() throws Exception {
     // Load properties
     Properties prop = new Properties();
-    try (FileInputStream input = new FileInputStream("src/main/resources/application.properties")) {
-      prop.load(input);
+//    try(FileInputStream input = new FileInputStream("application.properties")) {
+//      if (input == null) {
+//          throw new FileNotFoundException("application.properties not found in classpath");
+//      }
+//    prop.load(input);
+//  }
+    FileReader reader;
+    try {
+      reader = new FileReader("src/main/resources/application.properties");
+      prop.load(reader);
+    } catch (FileNotFoundException e) {
+      reader = new FileReader("application.properties");
+      prop.load(reader);
     }
 
     // Read properties
@@ -73,9 +87,7 @@ public class IPPPrintAppToPrinter {
       attrs.add(Sides.ONE_SIDED);
     }
     // Copies
-    if (copies > 1) {
-      attrs.add(new Copies(copies));
-    }
+    attrs.add(new Copies(copies));
     // Print quality
     if ("HIGH".equalsIgnoreCase(printQuality)) {
       attrs.add(PrintQuality.HIGH);
@@ -89,7 +101,6 @@ public class IPPPrintAppToPrinter {
     PrinterJob job = PrinterJob.getPrinterJob();
     job.setPageable(new PDFPageable(document));
 
-    // Find Microsoft Print to PDF
     for (PrintService svc : PrinterJob.lookupPrintServices()) {
       if (svc.getName().equalsIgnoreCase(targetPrinterName)) {
         job.setPrintService(svc);

@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: com.veeva.ipppapp.IPPPrintAppMain
+Class-Path: pdfbox-2.0.30.jar fontbox-2.0.30.jar
+Created-By: spina
