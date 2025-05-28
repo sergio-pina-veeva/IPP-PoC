@@ -17,30 +17,10 @@ import javax.print.attribute.standard.PrintQuality;
 import javax.print.attribute.standard.Sides;
 import java.awt.print.PrinterJob;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.InputStream;
 import java.util.Properties;
 
 public class IPPPrintAppToPrinter {
-  public static void print() throws Exception {
-    // Load properties
-    Properties prop = new Properties();
-//    try(FileInputStream input = new FileInputStream("application.properties")) {
-//      if (input == null) {
-//          throw new FileNotFoundException("application.properties not found in classpath");
-//      }
-//    prop.load(input);
-//  }
-    FileReader reader;
-    try {
-      reader = new FileReader("src/main/resources/application.properties");
-      prop.load(reader);
-    } catch (FileNotFoundException e) {
-      reader = new FileReader("application.properties");
-      prop.load(reader);
-    }
+  public static void print(Properties prop) throws Exception {
 
     // Read properties
     String filename = prop.getProperty("filename", "test.pdf");

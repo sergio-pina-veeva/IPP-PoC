@@ -3,6 +3,7 @@ package com.veeva.ipppapp;
 import javax.print.attribute.Attribute;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -13,15 +14,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 public class IPPPrintAppToPrintServer {
-  public static void print() throws Exception {
-    // Load properties
-    Properties prop = new Properties();
-    try (FileInputStream input = new FileInputStream("application.properties")) {
-      if (input == null) {
-        throw new FileNotFoundException("application.properties not found in classpath");
-      }
-      prop.load(input);
-    }
+  public static void print(Properties prop) throws Exception {
+
 
     // Read properties
     String ippUrl = prop.getProperty("ippUrl", "http://localhost:9163/printers/VirtualPrinter");
