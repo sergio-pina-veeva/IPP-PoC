@@ -1,10 +1,9 @@
 package com.veeva.ipppapp;
 
-import javax.print.attribute.Attribute;
+import com.veeva.ipppapp.util.IppJobStateParser;
+import com.veeva.ipppapp.util.IppJobStatePoller;
+
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -50,8 +49,11 @@ public class IPPPrintAppToPrintServer {
     HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
     System.out.println("Print job sent to: " + ippUrl);
-    System.out.println("IPP Server Response code: " + response.statusCode());
-    System.out.println("IPP Server Response body: " + response.body());}
+    System.out.println("Server Response code: " + response.statusCode());
+    IppJobStateParser.parseAndPrintJobStatus(response.body().getBytes(StandardCharsets.UTF_8));
+
+    IppJobStatePoller.pollJobStatus(ippUrl, 10, 1);
+  }
 
   private static byte[] buildIppPrintJobRequest(
        String jobName,
@@ -123,6 +125,4 @@ public class IPPPrintAppToPrintServer {
     buffer.putShort((short) 4); // int = 4 bytes
     buffer.putInt(intValue);
   }
-
-
 }
