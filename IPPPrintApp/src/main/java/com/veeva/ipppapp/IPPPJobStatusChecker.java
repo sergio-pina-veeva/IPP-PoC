@@ -7,7 +7,7 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-public class JobStatusChecker {
+public class IPPPJobStatusChecker {
 
   private static final int MAX_ATTEMPTS = 30;
   private static final int POLL_INTERVAL_MS = 1000;

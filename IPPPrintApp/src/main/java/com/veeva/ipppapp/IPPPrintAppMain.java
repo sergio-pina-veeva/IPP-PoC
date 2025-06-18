@@ -31,6 +31,9 @@ public class IPPPrintAppMain {
       case "-s":
         IPPPrintAppToPrintServer.print(prop);
         break;
+      case "-j":
+        JnaJobChecker.checkJobs(prop);
+        break;
       default:
         System.out.println("Unknown option: " + args[0]);
         System.out.println("Usage: java -jar IPPPrintApp.jar -d | -s");
