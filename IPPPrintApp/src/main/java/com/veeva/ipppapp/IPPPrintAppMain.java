@@ -8,8 +8,9 @@ public class IPPPrintAppMain {
   public static void main(String[] args) throws Exception {
     if (args.length == 0) {
       System.out.println("Usage: java -jar IPPPrintApp.jar -d | -s");
-      System.out.println("  -d   Direct printing to printer");
-      System.out.println("  -s   Printing through IPP print server");
+      System.out.println("  -d   Direct printing to printer.");
+      System.out.println("  -s   Printing through IPP print server.");
+      System.out.println("  -f   Finding of available printers.");
       System.exit(1);
     }
 
@@ -33,6 +34,9 @@ public class IPPPrintAppMain {
         break;
       case "-j":
         JnaJobChecker.checkJobs(prop);
+        break;
+      case "-f":
+        IPPPrintAppToPrinter.printerFinder();
         break;
       default:
         System.out.println("Unknown option: " + args[0]);

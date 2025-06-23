@@ -17,8 +17,9 @@ public class JnaJobChecker {
 //      localJobs.forEach(System.out::println);
 
       // Alternative using WinspoolUtil
-      List<JnaPrintJobInfo> utilJobs = manager.getPrintJobsUsingUtil("VirtualPrinter");
-      System.out.println("Jobs using Winspool utility method:");
+      List<JnaPrintJobInfo> utilJobs = manager.getPrintJobsUsingUtil(
+           prop.getProperty("targetPrinterName", "Microsoft Print to PDF"));
+      System.out.println("Current jobs in the printer:");
       utilJobs.forEach(System.out::println);
 
     } catch (Exception e) {

@@ -28,6 +28,7 @@ public class IPPPrintAppToPrinter {
       String filename = prop.getProperty("filename", "test.pdf");
       String fileLocation = prop.getProperty("fileLocation", "./");
       String targetPrinterName = prop.getProperty("targetPrinterName", "Microsoft Print to PDF");
+      String targetLocation = prop.getProperty("targetLocation", "./");
       String outputFile = prop.getProperty("outputFile", "printed_" + filename);
       String mediaSize = prop.getProperty("mediaSize", "A4");
       String orientation = prop.getProperty("orientation", "LANDSCAPE");
@@ -43,7 +44,7 @@ public class IPPPrintAppToPrinter {
       // Define print attributes
       PrintRequestAttributeSet attrs = new HashPrintRequestAttributeSet();
       attrs.add(new JobName(jobName, null));
-      attrs.add(new Destination(new File(fileLocation + outputFile).toURI()));
+      attrs.add(new Destination(new File(targetLocation + outputFile).toURI()));
       // Media size
       if ("A4".equalsIgnoreCase(mediaSize)) {
         attrs.add(MediaSizeName.ISO_A4);
@@ -84,14 +85,6 @@ public class IPPPrintAppToPrinter {
       job.setPageable(new PDFPageable(document));
 
       PrintService[] services = PrinterJob.lookupPrintServices();
-
-      System.out.println("Available printers:");
-      int i = 0;
-      for (PrintService svc : services) {
-        i++;
-        System.out.println(i + ". " + svc.getName());
-      }
-
       boolean printerFound = false;
       for (PrintService svc : services) {
         if (svc.getName().equalsIgnoreCase(targetPrinterName)) {
@@ -128,6 +121,17 @@ public class IPPPrintAppToPrinter {
       } else {
         System.out.println("ERROR: The printer didn't receive the job. Error message: " + e.getMessage());
       }
+    }
+  }
+
+  public static void printerFinder() {
+    PrintService[] services = PrinterJob.lookupPrintServices();
+
+    System.out.println("Available printers:");
+    int i = 0;
+    for (PrintService svc : services) {
+      i++;
+      System.out.println(i + ". " + svc.getName());
     }
   }
 }
