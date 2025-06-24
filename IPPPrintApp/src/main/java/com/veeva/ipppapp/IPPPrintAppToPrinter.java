@@ -8,9 +8,11 @@ import javax.print.attribute.Attribute;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.Chromaticity;
+import javax.print.attribute.standard.ColorSupported;
 import javax.print.attribute.standard.Copies;
 import javax.print.attribute.standard.Destination;
 import javax.print.attribute.standard.JobName;
+import javax.print.attribute.standard.Media;
 import javax.print.attribute.standard.MediaSizeName;
 import javax.print.attribute.standard.OrientationRequested;
 import javax.print.attribute.standard.PrintQuality;
@@ -85,16 +87,19 @@ public class IPPPrintAppToPrinter {
       job.setPageable(new PDFPageable(document));
 
       PrintService[] services = PrinterJob.lookupPrintServices();
+      PrintService serviceUsed= null;
       boolean printerFound = false;
       for (PrintService svc : services) {
         if (svc.getName().equalsIgnoreCase(targetPrinterName)) {
           job.setPrintService(svc);
+          serviceUsed = svc;
           printerFound = true;
           break;
         }
       }
       if (printerFound) {
         System.out.println("\nPrinter found: " + targetPrinterName);
+        printPropertiesAvailability(serviceUsed);
       } else {
         System.out.println("\nPrinter not found: " + targetPrinterName);
       }
@@ -132,6 +137,22 @@ public class IPPPrintAppToPrinter {
     for (PrintService svc : services) {
       i++;
       System.out.println(i + ". " + svc.getName());
+      printPropertiesAvailability(svc);
     }
+  }
+
+  private static void printPropertiesAvailability(PrintService service) {
+    System.out.println("--- Orientation supported: "
+         + (service.isAttributeCategorySupported(OrientationRequested.class) ? "true" : "false"));
+    System.out.println("--- Copies supported: "
+         + (service.isAttributeCategorySupported(Copies.class) ? "true" : "false"));
+    System.out.println("--- Media size supported: "
+         + (service.isAttributeCategorySupported(Media.class) ? "true" : "false"));
+    System.out.println("--- Print Quality supported: "
+         + (service.isAttributeCategorySupported(PrintQuality.class) ? "true" : "false"));
+    System.out.println("--- Duplex (Sides) supported: "
+         + (service.isAttributeCategorySupported(Sides.class) ? "true" : "false"));
+    System.out.println("--- Color supported: "
+         + (service.isAttributeCategorySupported(ColorSupported.class) ? "true" : "false"));
   }
 }
