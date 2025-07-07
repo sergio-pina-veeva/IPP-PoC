@@ -11,6 +11,7 @@ public class IPPPrintAppMain {
       System.out.println("  -d   Direct printing to printer.");
       System.out.println("  -s   Printing through IPP print server.");
       System.out.println("  -f   Finding of available printers.");
+      System.out.println("  -j   Checking the statuses of the jobs in the target printer.");
       System.exit(1);
     }
 

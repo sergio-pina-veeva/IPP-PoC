@@ -25,11 +25,12 @@ public class IPPPrintAppToPrintServer {
     String jobName = prop.getProperty("jobName", filename);
     String documentFormat = prop.getProperty("documentFormat", "application/pdf");
     int copies = Integer.parseInt(prop.getProperty("copies", "1"));
-    String media = prop.getProperty("media", "iso_a4_210x297mm");
-    int orientationRequested = Integer.parseInt(prop.getProperty("orientationRequested", "3"));
-    String sides = prop.getProperty("sides", "two-sided-long-edge");
+    String media = prop.getProperty("media");
+    int orientationRequested = Integer.parseInt(prop.getProperty("orientationRequested"));
+    String sides = prop.getProperty("sidesSp");
     String charset = prop.getProperty("charset", "utf-8");
-    String naturalLanguage = prop.getProperty("naturalLanguage", "en");byte[] fileBytes= new FileInputStream(filepath).readAllBytes();
+    String naturalLanguage = prop.getProperty("naturalLanguage", "en");
+    byte[] fileBytes= new FileInputStream(filepath).readAllBytes();
     byte[] ippRequest = buildIppPrintJobRequest(
          jobName, fileBytes, ippUrl, documentFormat, copies, media, orientationRequested, sides, charset, naturalLanguage
     );
@@ -46,13 +47,18 @@ public class IPPPrintAppToPrintServer {
          .POST(HttpRequest.BodyPublishers.ofByteArray(ippRequest))
          .build();
 
-    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+    try {
+      HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      System.out.println("Print job sent to: " + ippUrl);
+      System.out.println("Server Response code: " + response.statusCode());
+      IppJobStateParser.parseAndPrintJobStatus(response.body().getBytes(StandardCharsets.UTF_8));
 
-    System.out.println("Print job sent to: " + ippUrl);
-    System.out.println("Server Response code: " + response.statusCode());
-    IppJobStateParser.parseAndPrintJobStatus(response.body().getBytes(StandardCharsets.UTF_8));
+      IppJobStatePoller.pollJobStatus(ippUrl, 10, 1);
+    } catch (Exception e) {
+      System.out.println("Error: ");
+           e.printStackTrace();
+    }
 
-    IppJobStatePoller.pollJobStatus(ippUrl, 10, 1);
   }
 
   private static byte[] buildIppPrintJobRequest(
